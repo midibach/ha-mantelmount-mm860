@@ -91,10 +91,6 @@ class MantelMountConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
 class MantelMountOptionsFlow(config_entries.OptionsFlow):
     """Handle options flow for MantelMount MM860."""
 
-    def __init__(self, config_entry: config_entries.ConfigEntry) -> None:
-        """Initialize options flow."""
-        self.config_entry = config_entry
-
     async def async_step_init(
         self, user_input: dict | None = None
     ) -> FlowResult:
@@ -118,7 +114,7 @@ class MantelMountOptionsFlow(config_entries.OptionsFlow):
                 vol.Required(
                     CONF_POLL_INTERVAL,
                     default=current_poll,
-                ): vol.All(vol.Coerce(float), vol.Range(min=0.1, max=60)),
+                ): vol.Coerce(float),
                 vol.Required(
                     CONF_LOCK_WHILE_MOVING,
                     default=options.get(CONF_LOCK_WHILE_MOVING, DEFAULT_LOCK_WHILE_MOVING),

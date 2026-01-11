@@ -24,6 +24,8 @@ class MantelMountButtonEntityDescription(ButtonEntityDescription):
     command: str
     crlf: bool = False  # Use CR only to match native app (per pcap)
     ignore_lock: bool = False  # For stop button
+    clears_pending: bool = False  # If true, clears pending_preset (stop/jog)
+    recalls_preset: str | None = None  # If this button recalls a preset, which one?
 
 
 BUTTONS: tuple[MantelMountButtonEntityDescription, ...] = (
@@ -35,13 +37,15 @@ BUTTONS: tuple[MantelMountButtonEntityDescription, ...] = (
         icon="mdi:stop",
         command="MMJ0",
         ignore_lock=True,  # Stop should always work
+        clears_pending=True,  # Clears pending_preset to prevent wrong position learning
     ),
     MantelMountButtonEntityDescription(
         key="jog_up",
         translation_key="jog_up",
         name="Jog up",
         icon="mdi:arrow-up-bold",
-        command="MMJ2",  # Was MMJ1, swapped per user testing
+        command="MMJ2",
+        clears_pending=True,  # Jogging cancels preset movement
     ),
     MantelMountButtonEntityDescription(
         key="jog_down",
@@ -49,6 +53,7 @@ BUTTONS: tuple[MantelMountButtonEntityDescription, ...] = (
         name="Jog down",
         icon="mdi:arrow-down-bold",
         command="MMJ4",
+        clears_pending=True,
     ),
     MantelMountButtonEntityDescription(
         key="jog_left",
@@ -56,13 +61,56 @@ BUTTONS: tuple[MantelMountButtonEntityDescription, ...] = (
         name="Jog left",
         icon="mdi:arrow-left-bold",
         command="MMJ3",
+        clears_pending=True,
     ),
     MantelMountButtonEntityDescription(
         key="jog_right",
         translation_key="jog_right",
         name="Jog right",
         icon="mdi:arrow-right-bold",
-        command="MMJ1",  # Was MMJ2, swapped per user testing
+        command="MMJ1",
+        clears_pending=True,
+    ),
+    # Recall preset buttons (for external integrations like Unfolded Circle)
+    MantelMountButtonEntityDescription(
+        key="recall_home",
+        translation_key="recall_home",
+        name="Recall Home",
+        icon="mdi:home",
+        command="MMR0",
+        recalls_preset="Home",
+    ),
+    MantelMountButtonEntityDescription(
+        key="recall_m1",
+        translation_key="recall_m1",
+        name="Recall M1",
+        icon="mdi:numeric-1-box",
+        command="MMR1",
+        recalls_preset="M1",
+    ),
+    MantelMountButtonEntityDescription(
+        key="recall_m2",
+        translation_key="recall_m2",
+        name="Recall M2",
+        icon="mdi:numeric-2-box",
+        command="MMR2",
+        recalls_preset="M2",
+    ),
+    MantelMountButtonEntityDescription(
+        key="recall_m3",
+        translation_key="recall_m3",
+        name="Recall M3",
+        icon="mdi:numeric-3-box",
+        command="MMR3",
+        recalls_preset="M3",
+    ),
+    MantelMountButtonEntityDescription(
+        key="recall_m4",
+        translation_key="recall_m4",
+        name="Recall M4",
+        icon="mdi:numeric-4-box",
+        command="MMR4",
+        recalls_preset="M4",
     ),
     # Config buttons
     MantelMountButtonEntityDescription(
@@ -168,11 +216,31 @@ class MantelMountButton(CoordinatorEntity[MantelMountCoordinator], ButtonEntity)
         data = self._hass.data[DOMAIN][self._entry.entry_id]
         lock = data["lock_while_moving"]
         desc = self.entity_description
+        moving = (self.coordinator.data or {}).get("moving", False)
 
         # Check lock unless this button ignores it (like Stop)
-        if not desc.ignore_lock and lock and (self.coordinator.data or {}).get("moving"):
+        if not desc.ignore_lock and lock and moving:
             _LOGGER.debug("Button %s blocked - mount is moving", desc.key)
             return
+
+        # Clear pending_preset for stop/jog buttons to prevent wrong position learning
+        if desc.clears_pending and data.get("pending_preset"):
+            _LOGGER.debug("Button %s clearing pending_preset %s", desc.key, data["pending_preset"])
+            data["pending_preset"] = None
+
+        # Recall preset button: extra safety check
+        if desc.recalls_preset:
+            # Don't send another preset command if we're already moving to one
+            pending = data.get("pending_preset")
+            if pending and moving:
+                _LOGGER.warning(
+                    "Button %s blocked - already moving to preset %s",
+                    desc.key, pending
+                )
+                return
+            # Set pending preset so we learn position when movement stops
+            data["pending_preset"] = desc.recalls_preset
+            _LOGGER.debug("Set pending_preset to %s", desc.recalls_preset)
 
         _LOGGER.debug("Button %s pressed - sending command: %s", desc.key, desc.command)
         resp = await data["client"].send(desc.command, crlf=desc.crlf, read_reply=True)
