@@ -1,0 +1,101 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "MantelMount MM860",
+        "description": "Configure your MantelMount controller (UDP port 81).",
+        "data": {
+          "host": "Host",
+          "port": "Port",
+          "timeout": "Timeout (seconds)",
+          "poll_interval": "Poll interval (seconds, 0.1 = 100ms)",
+          "lock_while_moving": "Lock commands while moving"
+        }
+      }
+    },
+    "error": {
+      "cannot_connect": "Cannot connect to the device. Please check the IP address and port."
+    },
+    "abort": {
+      "already_configured": "This MantelMount is already configured."
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "MantelMount Options",
+        "description": "Adjust runtime settings for your MantelMount.",
+        "data": {
+          "timeout": "Timeout (seconds)",
+          "poll_interval": "Poll interval (seconds, 0.1 = 100ms)",
+          "lock_while_moving": "Lock commands while moving"
+        }
+      }
+    }
+  },
+  "entity": {
+    "select": {
+      "position": {
+        "name": "Position",
+        "state": {
+          "home": "Home",
+          "m1": "Preset 1",
+          "m2": "Preset 2",
+          "m3": "Preset 3",
+          "m4": "Preset 4"
+        }
+      }
+    },
+    "sensor": {
+      "elevation": { "name": "Elevation" },
+      "azimuth": { "name": "Azimuth" },
+      "left_actuator": { "name": "Left actuator" },
+      "right_actuator": { "name": "Right actuator" },
+      "temperature": { "name": "Temperature" },
+      "tv_current": { "name": "TV current" },
+      "left_motor_current": { "name": "Left motor current" },
+      "right_motor_current": { "name": "Right motor current" },
+      "firmware_version": { "name": "Firmware version" },
+      "last_preset": { "name": "Last preset" }
+    },
+    "binary_sensor": {
+      "moving": { "name": "Moving" },
+      "left_at_limit": { "name": "Left at limit" },
+      "right_at_limit": { "name": "Right at limit" },
+      "lost_flag": { "name": "Lost flag" }
+    },
+    "button": {
+      "stop": { "name": "Stop" },
+      "jog_up": { "name": "Jog up" },
+      "jog_down": { "name": "Jog down" },
+      "jog_left": { "name": "Jog left" },
+      "jog_right": { "name": "Jog right" },
+      "save_m1": { "name": "Save preset 1" },
+      "save_m2": { "name": "Save preset 2" },
+      "save_m3": { "name": "Save preset 3" },
+      "save_m4": { "name": "Save preset 4" },
+      "clear_fault": { "name": "Clear fault" },
+      "reboot": { "name": "Reboot" }
+    }
+  },
+  "services": {
+    "send_command": {
+      "name": "Send command",
+      "description": "Send a raw command string to the MantelMount controller.",
+      "fields": {
+        "command": {
+          "name": "Command",
+          "description": "ASCII command (e.g. MMR1, MMZ, MMQ)"
+        },
+        "crlf": {
+          "name": "Use CRLF",
+          "description": "If true, terminates with CRLF. If false, terminates with CR only."
+        },
+        "read_reply": {
+          "name": "Read reply",
+          "description": "If true, reads response from the controller."
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,24 @@
+send_command:
+  name: Send command
+  description: Send a raw command string to the MantelMount controller.
+  fields:
+    command:
+      name: Command
+      description: ASCII command (e.g. MMR1, MMZ, MMQ)
+      required: true
+      selector:
+        text:
+    crlf:
+      name: Use CRLF
+      description: If true, terminates with \r\n. If false, terminates with \r.
+      required: false
+      default: false
+      selector:
+        boolean:
+    read_reply:
+      name: Read reply
+      description: If true, reads response from the controller.
+      required: false
+      default: true
+      selector:
+        boolean:
