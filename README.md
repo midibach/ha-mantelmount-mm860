@@ -8,13 +8,14 @@ Home Assistant integration for the MantelMount MM860 motorized TV mount with net
 
 ## Features
 
-- **Position Presets**: Select from Home, M1, M2, M3, M4 presets via dropdown
+- **Position Presets**: Select from Home, M1-M9 presets via dropdown or recall buttons
+- **Current Preset Sensor**: Shows which preset matches current position
 - **Smart Preset Learning**: Automatically learns preset positions when recalled
 - **Jog Controls**: Manual movement buttons (Up, Down, Left, Right, Stop)
 - **Position Sensors**: Real-time elevation and azimuth readings
 - **Temperature Monitoring**: Internal temperature sensor (displays in your preferred units)
 - **Movement Detection**: Binary sensor shows when mount is moving
-- **Save Presets**: Buttons to save current position to M1-M4
+- **Save Presets**: Buttons to save current position to M1-M9
 - **Diagnostic Sensors**: Actuator positions, motor currents, firmware version
 
 ## Requirements
@@ -24,7 +25,7 @@ Home Assistant integration for the MantelMount MM860 motorized TV mount with net
 
 > **⚠️ Important Notes:**
 > - This integration has **not been tested on the MM860 v2**
-> - The M3 and M4 presets are not exposed on the RF remote, but the mount does store and retrieve them via this integration
+> - Presets M3-M9 are not exposed on the RF remote, but the mount does store and retrieve them via this integration
 > - No warranty or support of any kind is provided
 > - **Use at your own risk**
 
@@ -63,14 +64,16 @@ Home Assistant integration for the MantelMount MM860 motorized TV mount with net
 ### Controls
 | Entity | Type | Description |
 |--------|------|-------------|
-| Position | Select | Dropdown to recall Home/M1/M2/M3/M4 presets |
+| Position | Select | Dropdown to recall Home/M1-M9 presets |
+| Recall Home/M1-M9 | Button | Individual buttons to recall each preset |
 | Stop | Button | Stop all movement |
 | Jog Up/Down/Left/Right | Button | Manual movement controls |
-| Save preset 1-4 | Button | Save current position to preset |
+| Save preset 1-9 | Button | Save current position to preset |
 
 ### Sensors
 | Entity | Type | Description |
 |--------|------|-------------|
+| Current Preset | Sensor | Shows which preset matches current position |
 | Elevation | Sensor | Current vertical position |
 | Azimuth | Sensor | Current horizontal/swivel position |
 | Temperature | Sensor | Internal temperature (displays in °F or °C based on your HA settings) |
@@ -134,8 +137,8 @@ Send raw commands to the mount controller.
 
 This integration communicates via UDP on port 81 using MantelMount's proprietary protocol:
 - `MMQ` - Query status (returns 16-field CSV)
-- `MMR0-4` - Recall preset (Home, M1-M4)
-- `MMS1-4` - Save preset
+- `MMR0-9` - Recall preset (Home, M1-M9)
+- `MMS1-9` - Save preset
 - `MMJ0-4` - Jog (0=Stop, 1=Right, 2=Up, 3=Left, 4=Down)
 
 ## License
