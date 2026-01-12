@@ -72,6 +72,7 @@ BUTTONS: tuple[MantelMountButtonEntityDescription, ...] = (
         clears_pending=True,
     ),
     # Recall preset buttons (for external integrations like Unfolded Circle)
+    # These ignore lock to ensure they always work from external remotes
     MantelMountButtonEntityDescription(
         key="recall_home",
         translation_key="recall_home",
@@ -79,6 +80,7 @@ BUTTONS: tuple[MantelMountButtonEntityDescription, ...] = (
         icon="mdi:home",
         command="MMR0",
         recalls_preset="Home",
+        ignore_lock=True,
     ),
     MantelMountButtonEntityDescription(
         key="recall_m1",
@@ -87,6 +89,7 @@ BUTTONS: tuple[MantelMountButtonEntityDescription, ...] = (
         icon="mdi:numeric-1-box",
         command="MMR1",
         recalls_preset="M1",
+        ignore_lock=True,
     ),
     MantelMountButtonEntityDescription(
         key="recall_m2",
@@ -95,6 +98,7 @@ BUTTONS: tuple[MantelMountButtonEntityDescription, ...] = (
         icon="mdi:numeric-2-box",
         command="MMR2",
         recalls_preset="M2",
+        ignore_lock=True,
     ),
     MantelMountButtonEntityDescription(
         key="recall_m3",
@@ -103,6 +107,7 @@ BUTTONS: tuple[MantelMountButtonEntityDescription, ...] = (
         icon="mdi:numeric-3-box",
         command="MMR3",
         recalls_preset="M3",
+        ignore_lock=True,
     ),
     MantelMountButtonEntityDescription(
         key="recall_m4",
@@ -111,6 +116,52 @@ BUTTONS: tuple[MantelMountButtonEntityDescription, ...] = (
         icon="mdi:numeric-4-box",
         command="MMR4",
         recalls_preset="M4",
+        ignore_lock=True,
+    ),
+    MantelMountButtonEntityDescription(
+        key="recall_m5",
+        translation_key="recall_m5",
+        name="Recall M5",
+        icon="mdi:numeric-5-box",
+        command="MMR5",
+        recalls_preset="M5",
+        ignore_lock=True,
+    ),
+    MantelMountButtonEntityDescription(
+        key="recall_m6",
+        translation_key="recall_m6",
+        name="Recall M6",
+        icon="mdi:numeric-6-box",
+        command="MMR6",
+        recalls_preset="M6",
+        ignore_lock=True,
+    ),
+    MantelMountButtonEntityDescription(
+        key="recall_m7",
+        translation_key="recall_m7",
+        name="Recall M7",
+        icon="mdi:numeric-7-box",
+        command="MMR7",
+        recalls_preset="M7",
+        ignore_lock=True,
+    ),
+    MantelMountButtonEntityDescription(
+        key="recall_m8",
+        translation_key="recall_m8",
+        name="Recall M8",
+        icon="mdi:numeric-8-box",
+        command="MMR8",
+        recalls_preset="M8",
+        ignore_lock=True,
+    ),
+    MantelMountButtonEntityDescription(
+        key="recall_m9",
+        translation_key="recall_m9",
+        name="Recall M9",
+        icon="mdi:numeric-9-box",
+        command="MMR9",
+        recalls_preset="M9",
+        ignore_lock=True,
     ),
     # Config buttons
     MantelMountButtonEntityDescription(
@@ -143,6 +194,46 @@ BUTTONS: tuple[MantelMountButtonEntityDescription, ...] = (
         name="Save preset 4",
         icon="mdi:content-save",
         command="MMS4",
+        entity_category=EntityCategory.CONFIG,
+    ),
+    MantelMountButtonEntityDescription(
+        key="save_m5",
+        translation_key="save_m5",
+        name="Save preset 5",
+        icon="mdi:content-save",
+        command="MMS5",
+        entity_category=EntityCategory.CONFIG,
+    ),
+    MantelMountButtonEntityDescription(
+        key="save_m6",
+        translation_key="save_m6",
+        name="Save preset 6",
+        icon="mdi:content-save",
+        command="MMS6",
+        entity_category=EntityCategory.CONFIG,
+    ),
+    MantelMountButtonEntityDescription(
+        key="save_m7",
+        translation_key="save_m7",
+        name="Save preset 7",
+        icon="mdi:content-save",
+        command="MMS7",
+        entity_category=EntityCategory.CONFIG,
+    ),
+    MantelMountButtonEntityDescription(
+        key="save_m8",
+        translation_key="save_m8",
+        name="Save preset 8",
+        icon="mdi:content-save",
+        command="MMS8",
+        entity_category=EntityCategory.CONFIG,
+    ),
+    MantelMountButtonEntityDescription(
+        key="save_m9",
+        translation_key="save_m9",
+        name="Save preset 9",
+        icon="mdi:content-save",
+        command="MMS9",
         entity_category=EntityCategory.CONFIG,
     ),
     # Diagnostic buttons
@@ -214,39 +305,28 @@ class MantelMountButton(CoordinatorEntity[MantelMountCoordinator], ButtonEntity)
     async def async_press(self) -> None:
         """Handle the button press."""
         data = self._hass.data[DOMAIN][self._entry.entry_id]
-        lock = data["lock_while_moving"]
         desc = self.entity_description
+        lock = data["lock_while_moving"]
         moving = (self.coordinator.data or {}).get("moving", False)
 
-        # Check lock unless this button ignores it (like Stop)
+        # Check lock unless this button ignores it (Stop, Recall)
         if not desc.ignore_lock and lock and moving:
-            _LOGGER.debug("Button %s blocked - mount is moving", desc.key)
+            _LOGGER.debug("Button %s blocked - mount is moving and lock enabled", desc.key)
             return
 
         # Clear pending_preset for stop/jog buttons to prevent wrong position learning
         if desc.clears_pending and data.get("pending_preset"):
-            _LOGGER.debug("Button %s clearing pending_preset %s", desc.key, data["pending_preset"])
+            _LOGGER.debug("Button %s clearing pending_preset", desc.key)
             data["pending_preset"] = None
 
-        # Recall preset button: extra safety check
+        # Recall preset button: set pending so we learn position when movement stops
         if desc.recalls_preset:
-            # Don't send another preset command if we're already moving to one
-            pending = data.get("pending_preset")
-            if pending and moving:
-                _LOGGER.warning(
-                    "Button %s blocked - already moving to preset %s",
-                    desc.key, pending
-                )
-                return
-            # Set pending preset so we learn position when movement stops
             data["pending_preset"] = desc.recalls_preset
-            _LOGGER.debug("Set pending_preset to %s", desc.recalls_preset)
 
-        _LOGGER.debug("Button %s pressed - sending command: %s", desc.key, desc.command)
+        _LOGGER.debug("Button %s sending command: %s", desc.key, desc.command)
         resp = await data["client"].send(desc.command, crlf=desc.crlf, read_reply=True)
-        _LOGGER.debug("Response: %r", resp.raw)
 
-        # Update coordinator with last command for debugging
+        # Update coordinator with last command
         self.coordinator.data = {
             **(self.coordinator.data or {}),
             "last_command": desc.command,

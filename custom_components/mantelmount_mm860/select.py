@@ -15,7 +15,7 @@ from .coordinator import MantelMountCoordinator, get_device_info
 
 _LOGGER = logging.getLogger(__name__)
 
-OPTIONS = ["Home", "M1", "M2", "M3", "M4"]
+OPTIONS = ["Home", "M1", "M2", "M3", "M4", "M5", "M6", "M7", "M8", "M9"]
 
 # Position tolerance for matching presets (in device units)
 # Tighter tolerance ensures accurate preset detection

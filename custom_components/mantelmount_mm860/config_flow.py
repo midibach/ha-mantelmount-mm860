@@ -40,7 +40,7 @@ class MantelMountConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         config_entry: config_entries.ConfigEntry,
     ) -> MantelMountOptionsFlow:
         """Get the options flow for this handler."""
-        return MantelMountOptionsFlow(config_entry)
+        return MantelMountOptionsFlow()
 
     async def async_step_user(
         self, user_input: dict | None = None

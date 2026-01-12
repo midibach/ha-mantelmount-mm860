@@ -12,7 +12,7 @@ from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, Upda
 
 from .client import MantelMountClient
 from .protocol import parse_mmq
-from .const import DOMAIN, MANUFACTURER, MODEL, CONF_HOST, CONF_PORT
+from .const import DOMAIN, MANUFACTURER, MODEL, CONF_HOST
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -102,5 +102,5 @@ def get_device_info(entry: ConfigEntry, firmware: int | None = None) -> DeviceIn
         manufacturer=MANUFACTURER,
         model=MODEL,
         sw_version=str(firmware) if firmware else None,
-        configuration_url=f"http://{entry.data[CONF_HOST]}:{entry.data[CONF_PORT]}/",
+        configuration_url=f"http://{entry.data[CONF_HOST]}/",
     )

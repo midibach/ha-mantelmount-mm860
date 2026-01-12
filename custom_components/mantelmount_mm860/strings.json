@@ -42,7 +42,12 @@
           "m1": "Preset 1",
           "m2": "Preset 2",
           "m3": "Preset 3",
-          "m4": "Preset 4"
+          "m4": "Preset 4",
+          "m5": "Preset 5",
+          "m6": "Preset 6",
+          "m7": "Preset 7",
+          "m8": "Preset 8",
+          "m9": "Preset 9"
         }
       }
     },
@@ -56,7 +61,8 @@
       "left_motor_current": { "name": "Left motor current" },
       "right_motor_current": { "name": "Right motor current" },
       "firmware_version": { "name": "Firmware version" },
-      "last_preset": { "name": "Last preset" }
+      "last_preset": { "name": "Last preset" },
+      "current_preset": { "name": "Current Preset" }
     },
     "binary_sensor": {
       "moving": { "name": "Moving" },
@@ -75,10 +81,20 @@
       "recall_m2": { "name": "Recall M2" },
       "recall_m3": { "name": "Recall M3" },
       "recall_m4": { "name": "Recall M4" },
+      "recall_m5": { "name": "Recall M5" },
+      "recall_m6": { "name": "Recall M6" },
+      "recall_m7": { "name": "Recall M7" },
+      "recall_m8": { "name": "Recall M8" },
+      "recall_m9": { "name": "Recall M9" },
       "save_m1": { "name": "Save preset 1" },
       "save_m2": { "name": "Save preset 2" },
       "save_m3": { "name": "Save preset 3" },
       "save_m4": { "name": "Save preset 4" },
+      "save_m5": { "name": "Save preset 5" },
+      "save_m6": { "name": "Save preset 6" },
+      "save_m7": { "name": "Save preset 7" },
+      "save_m8": { "name": "Save preset 8" },
+      "save_m9": { "name": "Save preset 9" },
       "clear_fault": { "name": "Clear fault" },
       "reboot": { "name": "Reboot" }
     }
